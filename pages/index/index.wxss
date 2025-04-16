@@ -1,0 +1,81 @@
+.page {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  padding: 0rpx 20rpx 0rpx 20rpx;
+  background-color: #D3D3D3;
+}
+
+.page-scroll {
+  position: relative;
+  width: calc(100vw - 40rpx);
+  height: calc(100vh - 380rpx);
+  padding-top: 200rpx;
+}
+
+/* 隐藏滚动条 */
+::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+  color: transparent;
+}
+
+.anchor {
+  height: 1rpx; /* 只要有高度就可以跳转了 */
+  width: 100%;
+}
+
+.scroll-container {
+  padding-bottom: 20rpx;
+  z-index: 9999;
+}
+
+.item {
+  display: flex;
+  margin-bottom: 30rpx;
+  border-radius: 20rpx;
+}
+
+.item-question {
+  flex-direction: row-reverse;
+}
+
+.item-question .question-item {
+  max-width: calc(100% - 90rpx);
+  padding: 20rpx 25rpx;
+  font-size: 30rpx;
+  line-height: 45rpx;
+  background-color: #3646ff;
+  color: #ffffff;
+  border-radius: 20rpx;
+}
+
+.answer-item {
+  width: calc(100% - 40rpx);
+  padding: 20rpx;
+  padding-bottom: 40rpx;
+  background-color: #fff;
+  border-radius: 20rpx;
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 150rpx;
+  width: calc(100% - 40rpx);
+}
+
+.input-container .input {
+  width: calc(100vw - 40rpx);
+  height: 100rpx;
+  border: none;
+  background-color: transparent;
+  padding: 0 25rpx;
+  font-size: 35rpx;
+  background-color: #fff;
+  border-radius: 20rpx;
+  box-shadow: 5rpx 5rpx 10rpx rgba(0, 0, 0, 0.1);
+}    

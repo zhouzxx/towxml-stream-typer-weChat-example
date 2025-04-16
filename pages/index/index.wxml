@@ -1,0 +1,16 @@
+<view class="page">
+    <scroll-view class="page-scroll" scroll-y scroll-with-animation="true" scroll-into-view="{{scrollIntoViewId}}" scroll-style="none">
+        <view class="scroll-container">
+            <view class="{{itemClass}}">
+                <view class="answer-item">
+                    <!-- 假设 towxml 是自定义组件，需要在 json 文件中声明 -->
+                    <towxml md-text="{{mdText}}" speed="{{speed}}" is-finish="{{isFinish}}" bind:finish="finish" wx:if="{{isShow}}"></towxml>
+                </view>
+            </view>
+            <view class="anchor" id="scroll-anchor"></view>
+        </view>
+    </scroll-view>
+    <view class="input-container">
+        <input class="input" placeholder="请输入markdown文本地址" bindconfirm="sendQuestion" value="{{inputText}}" bindinput="onInputChange" />
+    </view>
+</view>    
