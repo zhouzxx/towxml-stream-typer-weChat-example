@@ -95,8 +95,9 @@
   background-color: #007aff;
   color: white;
   border: none;
-  border-radius: 10rpx;
+  border-radius: 20rpx;
   cursor: pointer;
+  font-size: 35rpx;
 }
 
 .arrow {
