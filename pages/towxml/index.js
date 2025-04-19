@@ -1,7 +1,7 @@
 const md = require('./parse/markdown/index'),
     parse = require('./parse/index')
 
-module.exports = (str, type, option) => {
+module.exports = (str, type, option, id) => {
     option = option || {};
     let result;
     switch (type) {
@@ -15,10 +15,10 @@ module.exports = (str, type, option) => {
                 return "\r"
             });
 
-            result = parse(r, option);
+            result = parse(r, option, id);
             break;
         case 'html':
-            result = parse(str, option);
+            result = parse(str, option, id);
             break;
         default:
             throw new Error('Invalid type, only markdown and html are supported');

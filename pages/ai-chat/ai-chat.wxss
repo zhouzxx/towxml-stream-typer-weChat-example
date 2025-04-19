@@ -1,0 +1,128 @@
+.page {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  padding: 0rpx 20rpx 0rpx 20rpx;
+  background-color: #d3d3d3;
+}
+
+.chat-scroll {
+  position: relative;
+  width: calc(100vw - 40rpx);
+  height: calc(100vh - 380rpx);
+  padding-top: 200rpx;
+}
+
+/* 隐藏滚动条 */
+::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+  color: transparent;
+}
+
+.anchor {
+  height: 1rpx;
+  /*只要有高度就可以跳转了*/
+  width: 100%;
+}
+
+.chat-body {
+  padding-bottom: 20rpx;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.item {
+  display: flex;
+  margin-bottom: 30rpx;
+  border-radius: 20rpx;
+  width: 100%;
+}
+
+.question {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.question-item {
+  max-width: calc(100% - 100rpx);
+  padding: 20rpx 25rpx;
+  font-size: 30rpx;
+  line-height: 45rpx;
+  background-color: #3646ff;
+  color: #ffffff;
+  border-radius: 20rpx;
+  word-break: break-all;
+}
+
+.answer-item {
+  width: calc(100% - 40rpx);
+  padding: 20rpx;
+  padding-bottom: 40rpx;
+  background-color: #fff;
+  border-radius: 20rpx;
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 150rpx;
+  width: calc(100% - 40rpx);
+}
+
+.input {
+  width: calc(100vw - 110rpx);
+  height: 100rpx;
+  border: none;
+  background-color: transparent;
+  padding: 0 25rpx;
+  font-size: 35rpx;
+  background-color: #fff;
+  border-radius: 20rpx;
+  box-shadow: 5rpx 5rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+
+.pause-button {
+  width: 150rpx;
+  height: 100rpx;
+  margin-left: 15rpx;
+  background-color: #007aff;
+  color: white;
+  border: none;
+  border-radius: 10rpx;
+  cursor: pointer;
+}
+
+.arrow {
+  position: absolute;
+  bottom: -140rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #3646ff;
+  color: #fff;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.2);
+  font-weight: bold;
+  font-size: 40rpx;
+  transition: bottom 0.3s ease;
+}
+
+.arrow-show {
+  bottom: 150rpx;
+}
+
+.arrow-hide {
+  bottom: -100rpx;
+}

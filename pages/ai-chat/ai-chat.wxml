@@ -1,0 +1,24 @@
+<view class="page">
+  <scroll-view class="chat-scroll" scroll-y scroll-with-animation="{{true}}" scroll-into-view="{{scrollIntoViewId}}" scroll-style="none" bindtouchstart="onTouchStart" bindscroll="onScroll">
+    <view class="chat-body">
+      <view wx:for="{{messages}}" wx:key="id" class="item">
+        <view wx:if="{{item.type == answerType}}" class="answer-item">
+          <towxml towxmlId="{{item.id}}" speed="{{speed}}" bindfinish="finish"></towxml>
+        </view>
+        <view wx:if="{{item.type == questionType}}" class="question">
+          <view class="question-item">{{item.content}}</view>
+        </view>
+      </view>
+      <view class="anchor" id="scroll-anchor"></view>
+    </view>
+  </scroll-view>
+  <view class="input-container">
+    <input class="input" placeholder="请输入markdown文本url地址" bindconfirm="sendQuestion" value="{{inputText}}" bindinput="inputTextChange" />
+    <button class="pause-button" bindtap="opClick">
+      {{ isTyping? "终止" : "发送" }}
+    </button>
+  </view>
+  <view class="arrow {{showArrow? 'arrow-show' : 'arrow-hide'}}" wx:if="{{showArrow}}" bindtap="scrollToBottomAndResumeAutoScroll">
+    <text>↓</text>
+  </view>
+</view>

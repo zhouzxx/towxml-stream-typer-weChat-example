@@ -4,6 +4,10 @@ Component({
     styleIsolation: "shared",
   },
   properties: {
+    towxmlId: {
+      type: String,
+      value: "",
+    },
     text: {
       type: String,
       value: "",
@@ -12,25 +16,25 @@ Component({
   observers: {
     text: function (newVal) {
       this.setData({ showText: this.data.text });
-      curText.value = this.data.text;
+      curText.value[this.data.towxmlId] = this.data.text;
       this.showText = this.data.text;
-    },
+    }
   },
   lifetimes: {
     attached: function () {
-      curText.value = this.data.text;
-      textInstaceUuid.value = this.generateUUIDWithTimestamp();
+      curText.value[this.data.towxmlId] = this.data.text;
+      textInstaceUuid.value[this.data.towxmlId] = this.generateUUIDWithTimestamp();
       // console.log("生成uuid  ",this.data.text)
       this.showText = this.data.text;
       this.setData({ showText: this.showText });
       const _this = this;
       // console.log("文字组件初始化完成")
-      textRenderCb.value = (newText) => {
+      textRenderCb.value[this.data.towxmlId] = (newText) => {
         _this.showText = _this.showText + newText;
-        curText.value = _this.showText
+        curText.value[_this.data.towxmlId] = _this.showText
         _this.setData({ showText: _this.showText });
       };
-    },
+    }
   },
   data: {
     showText: "",

@@ -1,6 +1,6 @@
 <block wx:for="{{nodes.children}}" wx:for-index="i" wx:for-item="item" wx:key="i">
 	<block wx:if="{{item.tag===undefined}}">
-    <typable-text text="{{item.text}}"/>
+    <typable-text text="{{item.text}}" towxmlId="{{item.towxmlId}}"/>
   </block>
 	<block wx:if="{{item.tag==='view'}}">
 		<block wx:if="{{item.rely}}">
