@@ -1,4 +1,4 @@
-<view style="min-height:{{hasSetHeight?height+'px':''}}" id="batch{{batchId}}">
+<view style="min-height:{{hasSetHeight?height+'px':''}}" id="batch{{batchId}}" class="towxml-batch">
 	<view wx-if="{{isShow}}">
 	<block wx:for="{{batchNodes}}" wx:for-index="i" wx:for-item="item" wx:key="i">
 	<block wx:if="{{item.tag===undefined}}">

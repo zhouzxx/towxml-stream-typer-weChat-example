@@ -8,15 +8,14 @@ const {
 
 Component({
   data: {
-    questionType: 0, // 问题类型标识
-    answerType: 1, // 答案类型标识
     inputText: "", // 输入框中的文本
-    scrollIntoViewId: "", // 滚动到指定元素的 ID
+    scrollIntoViewId: "", // 滚动到指定元素的id
     messages: [], // 消息列表
-    speed: 10, // 打字速度相关参数
     showArrow: false, // 是否显示下滑箭头
     isTyping: false, // 是否正在打字
-    screenHeight: wx.getSystemInfoSync().windowHeight // 屏幕高度
+    screenHeight: wx.getSystemInfoSync().windowHeight, // 屏幕高度
+    questionType: 0, // 问题类型标识
+    answerType: 1, // 答案类型标识
   },
   lifetimes: {
     attached() {
@@ -34,9 +33,13 @@ Component({
       if (!this.data.inputText) {
         return;
       }
-      // 有可能上次的答案还没打字完，你又发了新的问题，那么将上次的流式接口标识为完成
+      //有可能呢上次的答案还没打字完，你又发送了新的问题，那么做一下重置操作
+      this.setData({
+        isTyping: false
+      });
       setStreamFinsih(this.curTowxmlId);
       stopImmediatelyCb(this.curTowxmlId)
+
       const newQuestion = {
         id: new Date().getTime(),
         content: this.data.inputText,
@@ -66,7 +69,7 @@ Component({
               messages: updatedMessages,
               inputText: ""
             });
-            // 由于没有大模型的流式接口，所以拿到 markdown 文本之后，使用定时器模拟流式接口
+            // 由于我没有大模型的流式接口，所以这里发给网络请求获取markdown文本，再使用定时器模拟流式接口，你的话就根据你的实际接口情况进行更改
             this.generateStreamData(res.data);
           },
           fail: (e) => {
@@ -104,8 +107,8 @@ Component({
         // 流式接口结束
         if (c >= this.content.length) {
           // 通知 towxml 组件，流式接口结束，即本次回答所对应的所有 markdown 文本都已经拼接好了
-          // 因为 towmxl 组件打字的结束条件就是：1. 你的流式接口已经结束，即不在产生新的文本  2. 打字的字符已经超过了文本字符   必须同时满足这两个条件，才能说明打字结束
-          // 你要调用 setStreamFinsih 函数通知到底层 towxml 组件，函数的参数是当前正在打字的 towxml 组件的 id
+          // 因为 towmxl 组件判断打字的结束条件是：1. 你的流式接口已经结束，即不在产生新的文本  2. 打字的字符已经超过了文本字符   必须同时满足这两个条件，才能说明打字结束
+          // 你需要做的就是调用 setStreamFinsih 函数通知到底层 towxml 组件流式接口结束，函数的参数是当前正在打字的 towxml 组件的 id
           setStreamFinsih(this.curTowxmlId);
           return;
         }
@@ -135,10 +138,10 @@ Component({
         isTyping: false
       });
     },
-    onScroll() {
-      // 滚动事件回调，记得在滚动事件中回调 scrollCb，这样 towxml 组件内部才知道你滚动了，就会帮你进行虚拟显示
+    onScroll(e) {
+      // 滚动事件回调，记得在滚动事件中回调 scrollCb，并把参数进行传入，我会根据这个参数判断滚动方向，这样 towxml 组件内部才知道你滚动了，就会帮你进行虚拟显示
       // 如果你没有回调 scrollCb，towxml 组件内部就不会进行虚拟显示，随着程序的持续运行，对话次数的增多，页面的 dom 节点会越来越多，导致 1. 内存占用过大而发烫闪退  2. 随着内存占用过大，垃圾回收频繁，占据了很多运行时间，导致后期的打字速度受影响
-      scrollCb();
+      scrollCb(e);
     },
     onTouchStart() {
       // 触摸开始事件回调，只有正在打字的时候，用户滑动一下出现下滑箭头
@@ -167,6 +170,9 @@ Component({
       // 操作按钮点击事件回调
       if (this.data.isTyping) {
         stopImmediatelyCb(this.curTowxmlId);
+        this.setData({
+          isTyping: false
+        })
       } else {
         this.sendQuestion();
       }

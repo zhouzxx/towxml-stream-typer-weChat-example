@@ -1,5 +1,5 @@
 {
   "usingComponents": {
-    "towxml":"../towxml/towxml"
+    "chat-body": "../chat-body/chat-body"
   }
 }

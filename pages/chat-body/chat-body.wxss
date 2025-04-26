@@ -1,0 +1,31 @@
+.item {
+  display: flex;
+  margin-bottom: 30rpx;
+  border-radius: 20rpx;
+  width: 100%;
+}
+
+.question {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.question-item {
+  max-width: calc(100% - 100rpx);
+  padding: 20rpx 25rpx;
+  font-size: 30rpx;
+  line-height: 45rpx;
+  background-color: #3646ff;
+  color: #ffffff;
+  border-radius: 20rpx;
+  word-break: break-all;
+}
+
+.answer-item {
+  width: calc(100% - 40rpx);
+  padding: 20rpx;
+  padding-bottom: 40rpx;
+  background-color: #fff;
+  border-radius: 20rpx;
+}

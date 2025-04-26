@@ -36,17 +36,15 @@ const {
 } = require("./typable-text/text-cb");
 const {
   mdTextStore,
-  towxmlScrollCb,
   streamFinishStore,
   destroyTowxmlData,
-  stopStore
+  stopStore,
+  towxmlIdStore,
+  openTyperScore
 } = require("./globalCb");
 const {
   batchRenderCb,
-  batchHide,
-  batchShow,
   batchSetHeight,
-  batchHeight,
   initBatchCb,
   destroyBatchData,
 } = require("./batch/batch-cb");
@@ -77,84 +75,20 @@ Component({
       console.log("ready中当前towxml组件的id: ", this.data.towxmlId);
       console.log("开始打字时间：", new Date());
       console.log("创建了towxml组件实例");
+      console.log("当前的页面实例", getCurrentPages());
       if (this.data.openTyper && !this.isStarted) {
         streamFinishStore.value[this.data.towxmlId] = false;
+        openTyperScore.value[this.data.towxmlId] = true;
         initTextCb(this.data.towxmlId);
         initBatchCb(this.data.towxmlId);
         this.setData({ startShowBatch: true });
         this.isStarted = true;
-        const _this = this;
-        const screenHeight = wx.getSystemInfoSync().screenHeight;
-        console.log("屏幕的高度：", screenHeight);
-        towxmlScrollCb.value[this.data.towxmlId] = () => {
-          const query = _this.createSelectorQuery();
-          query
-            .select(`#towxml-${_this.data.towxmlId}`)
-            .boundingClientRect(async function (rect) {
-              // console.log(`towxml${_this.data.towxmlId}的rect的值：`, rect)
-              if (!rect) {
-                return;
-              }
-              const uplimt = (_this.data.screenNum - 0.5) * screenHeight * -1;
-              const downlimt = (_this.data.screenNum + 0.5) * screenHeight;
-              const _batchIds = Object.keys(
-                batchHeight.value[_this.data.towxmlId]
-              );
-              _batchIds.sort((a, b) => parseInt(a) - parseInt(b));
-              let totalHeight = 0;
-              const showIds = [];
-              const hideIds = [];
-              for (let i of _batchIds) {
-                totalHeight =
-                  totalHeight + batchHeight.value[_this.data.towxmlId][i];
-              }
-              if (rect.top > downlimt || rect.top + totalHeight < uplimt) {
-                for (let m of _batchIds) {
-                  hideIds.push(m);
-                }
-              } else {
-                let curTotalHeight = 0;
-                for (let n of _batchIds) {
-                  const curBatchHeight =
-                    batchHeight.value[_this.data.towxmlId][n];
-                  const curBatchUp = rect.top + curTotalHeight;
-                  const curBatchDown =
-                    rect.top + curTotalHeight + curBatchHeight;
-                  if (
-                    (curBatchUp >= uplimt && curBatchUp <= downlimt) ||
-                    (curBatchDown >= uplimt && curBatchDown <= downlimt) ||
-                    (curBatchUp <= uplimt && curBatchDown >= downlimt)
-                  ) {
-                    showIds.push(n);
-                  } else {
-                    hideIds.push(n);
-                  }
-                  curTotalHeight = curTotalHeight + curBatchHeight;
-                }
-              }
-              //之所以把要隐藏或者显示的batch组件放到这个来进行堵塞式渲染，就是因为如果同一时间高频的setData,可能会造成小程序渲染线程的渲染压力太大，而导致小程序直接闪退
-              for (let hideId of hideIds) {
-                batchHide.value[_this.data.towxmlId][hideId]();
-                await new Promise((resolve) =>
-                  setTimeout(() => {
-                    resolve();
-                  }, 40)
-                );
-              }
-              for (let showId of showIds) {
-                batchShow.value[_this.data.towxmlId][showId]();
-                await new Promise((resolve) =>
-                  setTimeout(() => {
-                    resolve();
-                  }, 80)
-                );
-              }
-            })
-            .exec();
-        };
+        towxmlIdStore.value.push(this.data.towxmlId);
         this.startType();
       }
       if (!this.data.openTyper) {
+        openTyperScore.value[this.data.towxmlId] = false 
+        const _this = this
         this.setData({
           dataNodes: towxml(
             mdTextStore.value[this.data.towxmlId],
@@ -162,6 +96,10 @@ Component({
             {},
             this.data.towxmlId
           ),
+        },()=>{
+          _this.triggerEvent("finish", {
+            message: "打字完毕！",
+          });
         });
       }
     },
@@ -170,40 +108,44 @@ Component({
       destroyTextData(this.data.towxmlId);
       destroyBatchData(this.data.towxmlId);
       destroyTowxmlData(this.data.towxmlId);
+      towxmlIdStore.value.push(this.data.towxmlId);
+      if(this.data.typerTimer){
+        this.data.typerTimer.cancel()
+      }
     },
   },
   data: {
     dataNodes: [],
     isStarted: false,
-    batchIds: [0, 1], //先提前创建两个分批组件,方便后面进行隔代创建
-    batchSize: 40,
+    batchIds: [0],
+    batchSize: 20,
     startShowBatch: false,
     screenNum: 10, //这个参数是指滚动时加载上下多少屏的数据，比如这里设置的8，就是加载当前屏幕中线位置上面8屏和下面8屏的数据
+    typerTimer: undefined
   },
   methods: {
     startType() {
       const _this = this;
-      let finishIndex = -1;
-      let c = 0;
+      let finishIndex = -1;     let c = 0;
       let typerText = "";
       let allText = "";
       let oldFirstLevelChildNodes = [];
-      let typerTimer = undefined;
       let testAfterMkSyntaxChar = "";
-      let flag = false;
       let tmpUuid = "";
       let index = 0;
       let isNeedFlushIndex = false;
       let lastCurText = "";
-      typerTimer = this.customSetInterval(() => {
+      this.data.typerTimer = this.customSetInterval(() => {
+      // typerTimer = setInterval(() => {
         //强制终止
-        if(stopStore.value[_this.data.towxmlId] == true){
+        if (stopStore.value[_this.data.towxmlId] == true) {
           this.triggerEvent("finish", {
             message: "打字完毕！",
           });
           console.log("结束打字时间：", new Date());
-          typerTimer.cancel();
-          return
+          _this.data.typerTimer.cancel();
+          // clearInterval(typerTimer)
+          return;
         }
         if (
           batchRenderCb.value[_this.data.towxmlId][
@@ -249,7 +191,8 @@ Component({
             message: "打字完毕！",
           });
           console.log("结束打字时间：", new Date());
-          typerTimer.cancel();
+          _this.data.typerTimer.cancel();
+          // clearInterval(typerTimer)
           return;
         }
         if (
@@ -303,9 +246,7 @@ Component({
             allNodesSize >=
             (_this.data.batchIds.length - 1) * _this.data.batchSize
           ) {
-            //当第n个批组件用完了，就创建n+2个批组件，隔代创建，防止batchRenderCb.value[_this.data.towxmlId][batchNum]为undifined
-            const _batchId =
-              Math.trunc(allNodesSize / _this.data.batchSize) + 1;
+            const _batchId = Math.trunc(allNodesSize / _this.data.batchSize);
             _this.data.batchIds[_batchId] = _batchId;
             _this.setData({
               [`batchIds[${_batchId}]`]: _batchId,
@@ -365,9 +306,7 @@ Component({
               allNodesSize >=
               (_this.data.batchIds.length - 1) * _this.data.batchSize
             ) {
-              //当第n个批组件用完了，就创建n+2个批组件，隔代创建，防止batchRenderCb.value[_this.data.towxmlId][batchNum]为undifined
-              const _batchId =
-                Math.trunc(allNodesSize / _this.data.batchSize) + 1;
+              const _batchId = Math.trunc(allNodesSize / _this.data.batchSize);
               _this.data.batchIds[_batchId] = _batchId;
               _this.setData({
                 [`batchIds[${_batchId}]`]: _batchId,
@@ -446,7 +385,7 @@ Component({
                     const batchNum = Math.trunc(
                       oldFirstLevelChildNodes.length / _this.data.batchSize
                     );
-                    for (let b = 0; b < batchNum - 1; b++) {
+                    for (let b = 0; b < batchNum; b++) {
                       batchSetHeight.value[_this.data.towxmlId][b]();
                     }
                     finishIndex = j;

@@ -1,14 +1,7 @@
 <view class="page">
   <scroll-view class="chat-scroll" scroll-y scroll-with-animation="{{true}}" scroll-into-view="{{scrollIntoViewId}}" scroll-style="none" bindtouchstart="onTouchStart" bindscroll="onScroll">
     <view class="chat-body">
-      <view wx:for="{{messages}}" wx:key="id" class="item">
-        <view wx:if="{{item.type == answerType}}" class="answer-item">
-          <towxml towxmlId="{{item.id}}" speed="{{speed}}" bindfinish="finish"></towxml>
-        </view>
-        <view wx:if="{{item.type == questionType}}" class="question">
-          <view class="question-item">{{item.content}}</view>
-        </view>
-      </view>
+      <chat-body messages="{{messages}}" bindfinish="finish"/>
       <view class="anchor" id="scroll-anchor"></view>
     </view>
   </scroll-view>

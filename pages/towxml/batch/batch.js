@@ -3,8 +3,9 @@ const {
   batchShow,
   batchHide,
   batchHeight,
-  batchSetHeight
+  batchSetHeight,
 } = require("./batch-cb");
+const { screenHeight, scrollRenderTimes } = require("../globalCb");
 Component({
   options: {
     styleIsolation: "shared",
@@ -17,73 +18,155 @@ Component({
     towxmlId: {
       type: String,
       value: 0,
-    }
+    },
   },
   lifetimes: {
     ready: function () {
-      console.log(`创建了batch${this.data.batchId}`)
-      const _this = this
-      batchRenderCb.value[this.data.towxmlId][this.data.batchId] = (index, node) => {
-        _this.data.batchNodes[index] = node
+      console.log(`创建了batch${this.data.batchId}`);
+      screenHeight.value = wx.getSystemInfoSync().screenHeight;
+      const _this = this;
+      batchRenderCb.value[this.data.towxmlId][this.data.batchId] = (
+        index,
+        node
+      ) => {
+        _this.data.batchNodes[index] = node;
         _this.setData({
-          [`batchNodes[${index}]`]:
-            node
+          [`batchNodes[${index}]`]: node,
         });
       };
-      batchShow.value[this.data.towxmlId][this.data.batchId] = () => {
-        if (_this.data.isShow == true) {
-          return
+
+      function renderBatch(index, fromBegin, resolve) {
+        if (
+          index >= _this.data.batchNodes.length ||
+          index < 0
+        ) {
+          resolve();
+          return;
         }
-        _this.data.isShow = true
-        _this.setData({
-          'batchNodes': _this.data.batchNodes,
-          isShow: true
-        });
-        console.log(`显示了towxml${_this.data.towxmlId}中的batch${this.data.batchId}`)
+        // if(_this.data.scrollRenderTimes != scrollRenderTimes.value){
+        //   console.log(`renderBatch中断了 towxmlId:${_this.data.towxmlId} batchId:${_this.data.batchId} index:${index} 的执行`)
+        //   resolve();
+        //   return;
+        // }
+        // console.log(`执行renderBatch towxmlId:${_this.data.towxmlId} batchId:${_this.data.batchId} index:${index}`)
+        _this.setData(
+          {
+            [`batchNodes[${index}]`]: _this.data.batchNodes[index],
+          },
+          () => {
+            const timer = setTimeout(() => {
+              renderBatch(
+                fromBegin ? index + 1 : index - 1,
+                fromBegin,
+                resolve
+              );
+              clearTimeout(timer)
+            }, 2);
+          }
+        );
       }
-      batchHide.value[this.data.towxmlId][this.data.batchId] = () => {
+
+      batchShow.value[this.data.towxmlId][this.data.batchId] = (
+        fromBegin,
+        resolve
+      ) => {
+        if (_this.data.isShow == true) {
+          resolve()
+          return;
+        }
+        _this.data.isShow = true;
+        const tmpDataNodes = _this.data.batchNodes;
+        // _this.data.batchNodes = [];
+        _this.setData(
+          {
+            batchNodes: _this.data.batchNodes,
+            isShow: true,
+          },
+          () => {
+            const timer = setTimeout(() => {
+              resolve()
+              clearTimeout(timer)
+            }, 5)
+            console.log(
+              `显示了towxml${_this.data.towxmlId}中的batch${this.data.batchId}`
+            );
+            // _this.data.batchNodes = tmpDataNodes;
+            // _this.data.scrollRenderTimes = scrollRenderTimes.value;
+            // if (fromBegin) {
+            //   renderBatch(0, fromBegin, resolve);
+            // } else {
+            //   if (_this.data.batchNodes.length > 0) {
+            //     renderBatch(
+            //       _this.data.batchNodes.length - 1,
+            //       fromBegin,
+            //       resolve
+            //     );
+            //   }
+            // }
+          }
+        );
+      };
+
+      batchHide.value[this.data.towxmlId][this.data.batchId] = (resolve) => {
         if (_this.data.isShow == false) {
-          return
+          resolve()
+          return;
         }
-        if(_this.data.height == 0){
-          return
+        if (_this.data.height == 0) {
+          resolve()
+          return;
         }
-        _this.data.isShow = false
+        _this.data.isShow = false;
         _this.setData({
           isShow: false,
           height: _this.data.height,
-          hasSetHeight: _this.data.hasSetHeight
+          hasSetHeight: _this.data.hasSetHeight,
+        }, () => {
+          const timer = setTimeout(() => {
+            resolve()
+            clearTimeout(timer)
+          }, 2)
+          console.log(
+            `隐藏了towxml${_this.data.towxmlId}中的batch${this.data.batchId}`
+          );
         });
-        console.log(`隐藏了towxml${_this.data.towxmlId}中的batch${this.data.batchId}`)
-      }
-      batchSetHeight.value[this.data.towxmlId][this.data.batchId] = flag => {
+      };
+
+      batchSetHeight.value[this.data.towxmlId][this.data.batchId] = (flag) => {
         if (_this.data.hasSetHeight && !flag) {
-          return
+          return;
         }
-        _this.data.hasSetHeight = true
+        _this.data.hasSetHeight = true;
         const query = _this.createSelectorQuery();
-        query.select(`#batch${_this.data.batchId}`).boundingClientRect((rect) => {
-          if (rect) {
-            _this.data.height = rect.height
-            batchHeight.value[_this.data.towxmlId][_this.data.batchId] = rect.height
-            _this.setData({
-              hasSetHeight: _this.data.hasSetHeight,
-              height: _this.data.height
-            });
-            console.log(`设置了batch${_this.data.batchId}的高度:${rect.height}`)
-          } else {
-            console.log('未找到指定元素');
-          }
-        }).exec();
-      }
+        query
+          .select(`#batch${_this.data.batchId}`)
+          .boundingClientRect((rect) => {
+            if (rect) {
+              _this.data.height = rect.height;
+              batchHeight.value[_this.data.towxmlId][_this.data.batchId] =
+                rect.height;
+              _this.setData({
+                hasSetHeight: _this.data.hasSetHeight,
+                height: _this.data.height,
+              });
+              console.log(
+                `设置了batch${_this.data.batchId}的高度:${rect.height}`
+              );
+            } else {
+              console.log("未找到指定元素");
+            }
+          })
+          .exec();
+      };
     },
   },
   data: {
     batchNodes: [],
     isShow: true,
     height: 0,
-    hasSetHeight: false
+    hasSetHeight: false,
+    observer: undefined,
+    scrollRenderTimes: 0,
   },
-  methods: {
-  },
+  methods: {},
 });
