@@ -2,7 +2,7 @@
 const {
   setMdText,
   scrollCb,
-  setStreamFinsih,
+  setStreamFinish,
   stopImmediatelyCb,
 } = require("../towxml/globalCb");
 
@@ -37,7 +37,7 @@ Component({
       this.setData({
         isTyping: false
       });
-      setStreamFinsih(this.curTowxmlId);
+      setStreamFinish(this.curTowxmlId);
       stopImmediatelyCb(this.curTowxmlId)
 
       const newQuestion = {
@@ -108,8 +108,8 @@ Component({
         if (c >= this.content.length) {
           // 通知 towxml 组件，流式接口结束，即本次回答所对应的所有 markdown 文本都已经拼接好了
           // 因为 towmxl 组件判断打字的结束条件是：1. 你的流式接口已经结束，即不在产生新的文本  2. 打字的字符已经超过了文本字符   必须同时满足这两个条件，才能说明打字结束
-          // 你需要做的就是调用 setStreamFinsih 函数通知到底层 towxml 组件流式接口结束，函数的参数是当前正在打字的 towxml 组件的 id
-          setStreamFinsih(this.curTowxmlId);
+          // 你需要做的就是调用 setStreamFinish 函数通知到底层 towxml 组件流式接口结束，函数的参数是当前正在打字的 towxml 组件的 id
+          setStreamFinish(this.curTowxmlId);
           return;
         }
         // 累积流式接口返回的文本，这里模拟流式接口，所以是一个个字符取的，你当前流式接口返回多少字符，就全部拼接上即可
