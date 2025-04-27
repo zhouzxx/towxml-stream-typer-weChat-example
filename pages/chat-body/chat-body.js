@@ -26,6 +26,7 @@ Component({
       //由于微信小程序的限制，createSelectorQuery只能查询到当前组件内的dom标签，不能查询父组件中或者页面上的标签，我无法在一个towmxl组件实例中获取其他towmxl实例对应的位置，所以不得不需要你的帮助
       //你就保持这个函数不变（即使用selectAll查询towxml的父标签）我这里是用了一个view包裹了towxml,并设置了一个类名叫做answer-item，不要给这个view设什么padding之类的，最好保证这个view的高度和towxml的高度一致
       //如果你没有设置这个函数，那么就没有虚拟显示功能，即显示所有内容，这样的话内存会慢慢撑爆而导致发热闪退
+      //data-towxmlid="{{item.id}}" 这个data属性也别忘记添加了
       setQueryTowxmlNodeFn.value = (fn) => {
         wx.createSelectorQuery().in(this)
           .selectAll(".answer-item")
