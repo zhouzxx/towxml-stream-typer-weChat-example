@@ -373,9 +373,23 @@ Component({
                 //应该判断allText[j - 1] && allText[j - 1].match(/\r?\n/g) 和 tmpNodes.children.length <= curNewNodesNum - 1同时成立，拆成两个if,提高效率
                 if (allText[j - 1] && allText[j - 1].match(/\r?\n/g)) {
                   //由于table要在第三行(第一行表头、第二行是|---|)时才会真正出现新的node,在table之前没有空行的时候，复用会错误，所以这里要特殊讨论一下
-                  if (curNewNodes.children.length > 0 && curNewNodes.children[curNewNodes.children.length - 1].tag == "table" && ((allText[j - 2] && allText[j - 2] == "|") || (allText[j - 3] && allText[j - 3] == "|"))) {
-                    j--
-                    continue
+                  if (curNewNodes.children.length > 0 && curNewNodes.children[curNewNodes.children.length - 1].tag == "table") {
+                    let tFlag = false
+                    let tIndex = j - 2
+                    while (true) {
+                      if (!allText[tIndex].match(/\r?\n/g) && allText[tIndex] != " " && allText[tIndex] == "|") {
+                        tFlag = true
+                        break
+                      }
+                      if (tIndex <= finishIndex) {
+                        break
+                      }
+                      tIndex--
+                    }
+                    if (tFlag) {
+                      j--
+                      continue
+                    }
                   }
                   const tmpNodes = towxml(
                     allText.substring(finishIndex, j),
