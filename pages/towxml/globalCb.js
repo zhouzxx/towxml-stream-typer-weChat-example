@@ -94,9 +94,10 @@ const scrollCb = throttle(async (e) => {
       const downlimt = screenNum * screenHeight.value;
       for (let node of towxmlNodes) {
         const towxmlId = node.dataset.towxmlid;
-        if(openTyperScore.value[towxmlId] == false || !batchHeight.value[towxmlId]){
+        if (!batchHeight.value[towxmlId]) {
           continue
         }
+        // console.log(`batchHeight.value[${towxmlId}]的值：`, batchHeight.value[towxmlId])
         const batchIds = Object.keys(batchHeight.value[towxmlId]);
         batchIds.sort((a, b) => parseInt(a) - parseInt(b));
         let totalHeight = 0;

@@ -1,6 +1,6 @@
 <view wx:for="{{messages}}" wx:key="id" class="item">
   <view wx:if="{{item.type == answerType}}" class="answer-item" bindfinish="finish" data-towxmlid="{{item.id}}">
-    <towxml towxmlId="{{item.id}}" speed="{{speed}}" bindfinish="finish"></towxml>
+    <towxml towxmlId="{{item.id}}" speed="{{speed}}" bindfinish="finish" bindhistoryMessageFinish="historyMessageFinish" openTyper="{{!item.isHistoryMessage}}"></towxml>
   </view>
   <view wx:if="{{item.type == questionType}}" class="question">
     <view class="question-item">{{item.content}}</view>

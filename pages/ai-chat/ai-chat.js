@@ -16,6 +16,7 @@ Component({
     screenHeight: wx.getSystemInfoSync().windowHeight, // 屏幕高度
     questionType: 0, // 问题类型标识
     answerType: 1, // 答案类型标识
+    historyMessageLoaded: true
   },
   lifetimes: {
     attached() {
@@ -26,6 +27,68 @@ Component({
       this.scroller = 0; // 滚动计数器
       this.curTowxmlId = ""; // 记录当前正在打字的 towxml 组件的 id
       this.autoScroll = true; // 是否自动滚动
+      this.finishedHistoryMessageNum = 0 //已渲染好的历史消息数量
+      this.historyMessageNum = 0 //历史消息总数量
+    },
+    ready() {
+      const _this = this
+      wx.showModal({
+        title: '提示',
+        content: '是否加载历史消息？',
+        confirmText: '确定',
+        confirmColor: '#FF0000',
+        cancelText: '取消',
+        success(res) {
+          if (res.confirm) {
+            _this.setData({ historyMessageLoaded: false })
+            wx.showLoading({
+              title: '历史消息加载中',
+              mask: true
+            });
+            _this.finishedHistoryMessageNum = 0
+            _this.historyMessageNum = 0
+            wx.request({
+              url: 'http://110.41.9.23/static/video-embed.md',
+              dataType: 'text', // 对应uni.request的encoding: "utf-8"
+              success: async function (res) {
+                const historyMessages = []
+                //构造50条历史消息
+                for (let i = 1; i <= 50; i++) {
+                  const curId = new Date().getTime();
+                  historyMessages.push({
+                    id: curId,
+                    content: `历史问题${i}`,
+                    type: _this.data.questionType,
+                    isHistoryMessage: true
+                  });
+                  //加个3,防止id重复
+                  const towxmlId = curId + 3
+                  historyMessages.push({
+                    id: towxmlId,
+                    type: _this.data.answerType,
+                    isHistoryMessage: true,
+                  });
+                  //历史消息的数量加1
+                  _this.historyMessageNum++
+                  //必须在渲染历史消息之前就调用这个函数
+                  setMdText(towxmlId, res.data)
+                  //堵塞一下，防止由时间生成的id重复
+                  await new Promise((resolve) => {
+                    const timer = setTimeout(() => {
+                      resolve()
+                      clearTimeout(timer)
+                    }, 10)
+                  })
+                }
+                //渲染历史消息
+                _this.setData({
+                  messages: historyMessages
+                })
+              }
+            })
+          }
+        }
+      })
     }
   },
   methods: {
@@ -182,6 +245,17 @@ Component({
       this.setData({
         inputText: e.detail.value
       });
+    },
+    //每当一条历史消息渲染完毕，就会回调这个函数，当所有的历史消息都渲染完毕，将v-show设为true
+    historyMessageFinish(e) {
+      this.finishedHistoryMessageNum++
+      //渲染的历史消息数量大于等于历史消息总数，说明全部渲染完毕
+      if (this.finishedHistoryMessageNum >= this.historyMessageNum) {
+        this.setData({ historyMessageLoaded: true })
+        wx.hideLoading();
+        this.scrollToBottom();
+      }
+      console.log("收到一条历史消息渲染完毕的回调")
     }
   }
 });

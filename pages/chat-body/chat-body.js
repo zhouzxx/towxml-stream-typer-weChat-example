@@ -18,7 +18,7 @@ Component({
   data: {
     questionType: 0, // 问题类型标识
     answerType: 1, // 答案类型标识
-    speed: 10, // 打字速度相关参数
+    speed: 8, // 打字速度相关参数
   },
   lifetimes: {
     ready() {
@@ -41,6 +41,9 @@ Component({
   methods: {
     finish(e) {
       this.triggerEvent("finish", e);
+    },
+    historyMessageFinish(e) {
+      this.triggerEvent("historyMessageFinish", e);
     },
   }
 });

@@ -87,20 +87,29 @@ Component({
         this.startType();
       }
       if (!this.data.openTyper) {
-        openTyperScore.value[this.data.towxmlId] = false 
+        openTyperScore.value[this.data.towxmlId] = false
+        initBatchCb(this.data.towxmlId);
         const _this = this
-        this.setData({
-          dataNodes: towxml(
-            mdTextStore.value[this.data.towxmlId],
-            "markdown",
-            {},
-            this.data.towxmlId
-          ),
-        },()=>{
-          _this.triggerEvent("finish", {
-            message: "打字完毕！",
-          });
-        });
+        const renderHistoryMessage = () => {
+          if (batchRenderCb.value[_this.data.towxmlId][0]) {
+            batchRenderCb.value[_this.data.towxmlId][0](undefined, towxml(
+              mdTextStore.value[_this.data.towxmlId],
+              "markdown",
+              {},
+              _this.data.towxmlId
+            ).children, () => {
+              _this.triggerEvent("historyMessageFinish", {
+                message: "一条历史消息完毕！",
+              });
+            })
+          } else {
+            const timer = setTimeout(() => {
+              renderHistoryMessage();
+              clearTimeout(timer)
+            }, 10)
+          }
+        }
+        renderHistoryMessage()
       }
     },
     //销毁该towxml实例相关的全局数据，防止内存泄漏
@@ -109,7 +118,7 @@ Component({
       destroyBatchData(this.data.towxmlId);
       destroyTowxmlData(this.data.towxmlId);
       towxmlIdStore.value.push(this.data.towxmlId);
-      if(this.data.typerTimer){
+      if (this.data.typerTimer) {
         this.data.typerTimer.cancel()
       }
     },
@@ -126,7 +135,8 @@ Component({
   methods: {
     startType() {
       const _this = this;
-      let finishIndex = -1;     let c = 0;
+      let finishIndex = -1;
+      let c = 0;
       let typerText = "";
       let allText = "";
       let oldFirstLevelChildNodes = [];
@@ -136,7 +146,7 @@ Component({
       let isNeedFlushIndex = false;
       let lastCurText = "";
       this.data.typerTimer = this.customSetInterval(() => {
-      // typerTimer = setInterval(() => {
+        // typerTimer = setInterval(() => {
         //强制终止
         if (stopStore.value[_this.data.towxmlId] == true) {
           this.triggerEvent("finish", {
@@ -149,7 +159,7 @@ Component({
         }
         if (
           batchRenderCb.value[_this.data.towxmlId][
-            _this.data.batchIds[_this.data.batchIds.length - 1]
+          _this.data.batchIds[_this.data.batchIds.length - 1]
           ] == undefined
         ) {
           // console.log(`空转一下，等待batch组件实例${_this.data.batchIds[_this.data.batchIds.length - 1]}创建好`)

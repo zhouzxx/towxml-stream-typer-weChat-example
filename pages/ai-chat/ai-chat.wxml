@@ -1,7 +1,7 @@
 <view class="page">
   <scroll-view class="chat-scroll" scroll-y scroll-with-animation="{{true}}" scroll-into-view="{{scrollIntoViewId}}" scroll-style="none" bindtouchstart="onTouchStart" bindscroll="onScroll">
-    <view class="chat-body">
-      <chat-body messages="{{messages}}" bindfinish="finish"/>
+    <view class="chat-body" style="display:{{historyMessageLoaded?'flex':'none !important'}}">
+      <chat-body messages="{{messages}}" bindfinish="finish" bindhistoryMessageFinish="historyMessageFinish" />
       <view class="anchor" id="scroll-anchor"></view>
     </view>
   </scroll-view>

@@ -27,12 +27,36 @@ Component({
       const _this = this;
       batchRenderCb.value[this.data.towxmlId][this.data.batchId] = (
         index,
-        node
+        node,
+        cb
       ) => {
         _this.data.batchNodes[index] = node;
-        _this.setData({
-          [`batchNodes[${index}]`]: node,
-        });
+        if (index == undefined) {
+          _this.setData({
+            batchNodes: node,
+          }, () => {
+            if (cb) {
+              cb()
+              const setHistoryBatchHeight = () => {
+                if (_this.data.height == 0) {
+                  batchSetHeight.value[this.data.towxmlId][this.data.batchId](true)
+                  const timer = setTimeout(() => {
+                    clearTimeout(timer)
+                    setHistoryBatchHeight()
+                  }, 500)
+                }
+              }
+              const _timer = setTimeout(() => {
+                setHistoryBatchHeight()
+                clearTimeout(_timer)
+              }, 500)
+            }
+          });
+        } else {
+          _this.setData({
+            [`batchNodes[${index}]`]: node,
+          });
+        }
       };
 
       function renderBatch(index, fromBegin, resolve) {
