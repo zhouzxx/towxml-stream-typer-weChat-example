@@ -52,8 +52,8 @@ Component({
               dataType: 'text', // 对应uni.request的encoding: "utf-8"
               success: async function (res) {
                 const historyMessages = []
-                //构造50条历史消息
-                for (let i = 1; i <= 50; i++) {
+                //构造30条历史消息
+                for (let i = 1; i <= 30; i++) {
                   const curId = new Date().getTime();
                   historyMessages.push({
                     id: curId,
@@ -246,14 +246,18 @@ Component({
         inputText: e.detail.value
       });
     },
-    //每当一条历史消息渲染完毕，就会回调这个函数，当所有的历史消息都渲染完毕，将v-show设为true
+    //每当一条历史消息渲染完毕，就会回调这个函数，当所有的历史消息都渲染完毕，将visibility设为visible
     historyMessageFinish(e) {
       this.finishedHistoryMessageNum++
       //渲染的历史消息数量大于等于历史消息总数，说明全部渲染完毕
       if (this.finishedHistoryMessageNum >= this.historyMessageNum) {
-        this.setData({ historyMessageLoaded: true })
-        wx.hideLoading();
         this.scrollToBottom();
+        //因为滚动到底部需要一点时间，所以800毫秒之后再设置可见
+        const timer = setTimeout(() => {
+          this.setData({ historyMessageLoaded: true })
+          wx.hideLoading();
+          clearTimeout(timer)
+        }, 800)
       }
       console.log("收到一条历史消息渲染完毕的回调")
     }
