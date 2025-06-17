@@ -87,6 +87,10 @@ Component({
         this.startType();
       }
       if (!this.data.openTyper) {
+        if (!mdTextStore.value[this.data.towxmlId] || mdTextStore.value[this.data.towxmlId].length <= 0) {
+          console.log(`id为${this.data.towxmlId}对应的历史消息为空，请务必在该towxml组件实例开始渲染之前，而不是渲染之后，通过setMdText函数设置好历史消息！`)
+          return
+        }
         openTyperScore.value[this.data.towxmlId] = false
         initBatchCb(this.data.towxmlId);
         const _this = this
