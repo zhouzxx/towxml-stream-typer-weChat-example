@@ -63,7 +63,7 @@ Component({
     },
     openTyper: {
       type: Boolean,
-      value: true,
+      value: false,
     },
     theme: {
       type: String,
@@ -75,7 +75,6 @@ Component({
       console.log("ready中当前towxml组件的id: ", this.data.towxmlId);
       console.log("开始打字时间：", new Date());
       console.log("创建了towxml组件实例");
-      console.log("当前的页面实例", getCurrentPages());
       if (this.data.openTyper && !this.isStarted) {
         streamFinishStore.value[this.data.towxmlId] = false;
         openTyperScore.value[this.data.towxmlId] = true;
@@ -94,26 +93,28 @@ Component({
         openTyperScore.value[this.data.towxmlId] = false
         initBatchCb(this.data.towxmlId);
         const _this = this
-        const renderHistoryMessage = () => {
-          if (batchRenderCb.value[_this.data.towxmlId][0]) {
-            batchRenderCb.value[_this.data.towxmlId][0](undefined, towxml(
-              mdTextStore.value[_this.data.towxmlId],
-              "markdown",
-              {},
-              _this.data.towxmlId
-            ).children, () => {
-              _this.triggerEvent("historyMessageFinish", {
-                message: "一条历史消息完毕！",
-              });
-            })
-          } else {
-            const timer = setTimeout(() => {
-              renderHistoryMessage();
-              clearTimeout(timer)
-            }, 10)
+        this.setData({ startShowBatch: true }, () => {
+          const renderHistoryMessage = () => {
+            if (batchRenderCb.value[_this.data.towxmlId][0]) {
+              batchRenderCb.value[_this.data.towxmlId][0](undefined, towxml(
+                mdTextStore.value[_this.data.towxmlId],
+                "markdown",
+                {},
+                _this.data.towxmlId
+              ).children, () => {
+                _this.triggerEvent("historyMessageFinish", {
+                  message: "一条历史消息完毕！",
+                });
+              })
+            } else {
+              const timer = setTimeout(() => {
+                renderHistoryMessage();
+                clearTimeout(timer)
+              }, 10)
+            }
           }
-        }
-        renderHistoryMessage()
+          renderHistoryMessage()
+        });
       }
     },
     //销毁该towxml实例相关的全局数据，防止内存泄漏
@@ -183,11 +184,18 @@ Component({
           for (let i = 0; i < objTree.children.length; i++) {
             _this.data.dataNodes[oldFirstLevelChildNodes.length + i] =
               objTree.children[i];
-            //通过路径的方式，一个个元素地渲染，比直接_this.setData(dataNodes,数组)的方式，效率提高很多
-            _this.setData({
-              [`dataNodes[${oldFirstLevelChildNodes.length + i}]`]:
-                objTree.children[i],
-            });
+            const batchNum = Math.trunc((oldFirstLevelChildNodes.length + i) / _this.data.batchSize);
+            const renderIndex =
+              (oldFirstLevelChildNodes.length + i) % _this.data.batchSize;
+            batchRenderCb.value[_this.data.towxmlId][batchNum](
+              renderIndex,
+              objTree.children[i]
+            );
+            //通过路径的方式，一个个元素地渲染，比直接_this.setData({dataNodes:数组})的方式，效率提高很多
+            // _this.setData({
+            //   [`dataNodes[${oldFirstLevelChildNodes.length + i}]`]:
+            //     objTree.children[i],
+            // });
           }
           //重新设置一下batch的高度，防止有些batch里面有图片等加载需要一定时间的元素，导致记录的batch有误
           for (let i of _this.data.batchIds) {

@@ -7,6 +7,6 @@
     </block>
   </view>
   <view class="h2w__main" wx:else>
-    <batch batchId="{{0}}" towxmlId="{{towxmlId}}" />
+    <batch wx:if="{{startShowBatch}}" batchId="{{0}}" towxmlId="{{towxmlId}}" />
   </view>
 </view>
