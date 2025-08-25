@@ -113,8 +113,8 @@ Component({
         messages: newMessages
       }, () => {
         // 目前可以给你用来测试的地址，当然可以用你自己的
-        // url: `http://110.41.9.23/static/video-embed.md`,
-        // url: `http://110.41.9.23/static/md-editor-vue3.md`,
+        // url: `http://47.119.142.242/static/video-embed.md`,
+        // url: `http://47.119.142.242/static/md-editor-v3.md`,
         // url: `https://zxx-wwj-oss.oss-cn-shenzhen.aliyuncs.com/schChoose/article/d338e6c9-dc59-45d1-8482-5ea21d05f449/923e9f20-46da-4026-844b-f6a2c14ec0eb.md`,
         // url: `https://zxx-wwj-oss.oss-cn-shenzhen.aliyuncs.com/schChoose/article/4d711758-074e-4be8-b280-77cc51719248/08c54e75-144f-426a-ba38-eb91cf464846.md`,
         wx.request({
