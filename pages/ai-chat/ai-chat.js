@@ -48,7 +48,7 @@ Component({
             _this.finishedHistoryMessageNum = 0
             _this.historyMessageNum = 0
             wx.request({
-              url: 'http://110.41.9.23/static/video-embed.md',
+              url: 'http://47.119.142.242/static/video-embed.md',
               dataType: 'text', // 对应uni.request的encoding: "utf-8"
               success: async function (res) {
                 const historyMessages = []
